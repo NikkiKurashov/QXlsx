@@ -137,6 +137,118 @@ struct XlsxColumnInfo {
     bool collapsed;
 };
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%5 by nikki %%%%%%%%%%%%%%%%%%%%%%
+
+struct XlsxPrintOptions
+{
+    XlsxPrintOptions(bool horizontalCentered=false, bool verticalCentered=false, bool headings=false, bool gridLines=false, bool gridLinesSet=true) :
+        horizontalCentered(horizontalCentered), verticalCentered(verticalCentered), headings(headings), gridLines(gridLines), gridLinesSet(gridLinesSet)
+    {
+
+    }
+
+    bool horizontalCentered;
+    bool verticalCentered;
+    bool headings;
+    bool gridLines;
+    bool gridLinesSet;
+};
+
+struct XlsxPageMargins
+{
+    // default values are from "Normal" setting of Microsoft Office 2010
+    XlsxPageMargins(double left=0.7, double right=0.7, double top=0.75, double bottom=0.75, double header=0.3, double footer=0.3) :
+        left(left), right(right), top(top), bottom(bottom), header(header), footer(footer)
+    {
+
+    }
+
+    double left;
+    double right;
+    double top;
+    double bottom;
+    double header;
+    double footer;
+};
+
+struct XlsxPageSetup
+{
+
+    static QString pageOrderString(Worksheet::PrintPageOrder pageOrder)
+    {
+        switch (pageOrder) {
+            case Worksheet::DownThenOver: return "downThenOver";
+            case Worksheet::OverThenDown: return "overThenDown";
+            default:                      return "error";
+        }
+    }
+
+    static QString orientationString(Worksheet::PrintOrientation orientation)
+    {
+        switch (orientation) {
+            case Worksheet::Default:   return "default";
+            case Worksheet::Portrait:  return "portrait";
+            case Worksheet::Landscape: return "landscape";
+            default:                   return "error";
+        }
+    }
+
+    static QString cellCommentsString(Worksheet::PrintCellComments cellComments)
+    {
+        switch (cellComments) {
+            case Worksheet::None:        return "none";
+            case Worksheet::AsDisplayed: return "asDisplayed";
+            case Worksheet::AtEnd:       return "atEnd";
+            default:                     return "error";
+        }
+    }
+
+    static QString errorsString(Worksheet::PrintErrors errors)
+    {
+        switch (errors) {
+            case Worksheet::Displayed: return "displayed";
+            case Worksheet::Blank:     return "blank";
+            case Worksheet::Dash:      return "dash";
+            case Worksheet::NA:        return "NA";
+            default:                   return "error";
+        }
+    }
+
+    // defaults are from the XMLSchema
+    XlsxPageSetup() :
+        paperSize(1), scale(100), firstPageNumber(1), fitToWidth(1), fitToHeight(1), pageOrder(Worksheet::DownThenOver),
+        orientation(Worksheet::Default), usePrinterDefaults(true), blackAndWhite(false), draft(false), cellComments(Worksheet::None),
+        useFirstPageNumber(false), errors(Worksheet::Displayed), horizontalDpi(600), verticalDpi(600), copies(1), rID()
+    {
+
+    }
+
+    quint32 paperSize;
+    quint32 scale;
+    quint32 firstPageNumber;
+    quint32 fitToWidth;
+    quint32 fitToHeight;
+    Worksheet::PrintPageOrder pageOrder;
+    Worksheet::PrintOrientation orientation;
+    bool usePrinterDefaults;
+    bool blackAndWhite;
+    bool draft;
+    Worksheet::PrintCellComments cellComments;
+    bool useFirstPageNumber;
+    Worksheet::PrintErrors errors;
+    quint32 horizontalDpi;
+    quint32 verticalDpi;
+    quint32 copies;
+    QString rID;
+};
+
+
+// #ifndef QMapIntSharedPointerCell
+// typedef QMap<int, QSharedPointer<Cell> > QMapIntSharedPointerCell;
+// #endif
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 class WorksheetPrivate : public AbstractSheetPrivate
 {
     Q_DECLARE_PUBLIC(Worksheet)
@@ -163,6 +275,12 @@ public:
     void saveXmlDrawings(QXmlStreamWriter &writer) const;
     void saveXmlDataValidations(QXmlStreamWriter &writer) const;
 
+    //%%%%%%%%%%%%%%%%%%%%%%%%% by nikki %%%%%%%%%%%%%%%%%%%%
+    void saveXmlPrintOptions(QXmlStreamWriter &writer) const;
+    void saveXmlPageMargins(QXmlStreamWriter &writer) const;
+    void saveXmlPageSetup(QXmlStreamWriter &writer) const;
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     int rowPixelsSize(int row) const;
     int colPixelsSize(int col) const;
 
@@ -173,6 +291,12 @@ public:
     void loadXmlSheetFormatProps(QXmlStreamReader &reader);
     void loadXmlSheetViews(QXmlStreamReader &reader);
     void loadXmlHyperlinks(QXmlStreamReader &reader);
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%% by nikki %%%%%%%%%%%%%%%%%%%%%%
+    void loadXmlPrintOptions(QXmlStreamReader &reader);
+    void loadXmlPageMargins(QXmlStreamReader &reader);
+    void loadXmlPageSetup(QXmlStreamReader &reader);
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     QList<QSharedPointer<XlsxRowInfo>> getRowInfoList(int rowFirst, int rowLast);
     QList<QSharedPointer<XlsxColumnInfo>> getColumnInfoList(int colFirst, int colLast);
@@ -238,6 +362,12 @@ public:
     bool showRuler;
     bool showOutlineSymbols;
     bool showWhiteSpace;
+
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%55 by nikki %%%%%%%%%%%%%%%%%%%%%%%%%%
+    XlsxPageSetup pageSetup;
+    XlsxPrintOptions printOptions;
+    XlsxPageMargins pageMargins;
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     QRegularExpression urlPattern;
 
